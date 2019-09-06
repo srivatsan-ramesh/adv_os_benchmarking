@@ -1,0 +1,8 @@
+Resources
+i) https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf - Use inline assembly
+
+Clock sources
+i) CPU clock
+ii) Programmable interrupt timer
+iii) Real time clock
+iv) High resolution event timer 
