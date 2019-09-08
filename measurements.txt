@@ -1,8 +1,16 @@
 Resources
 i) https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/ia-32-ia-64-benchmark-code-execution-paper.pdf - Use inline assembly
+ii) https://0xax.gitbooks.io/linux-insides/Timers/linux-timers-6.html
+iii) https://en.wikipedia.org/wiki/Time_Stamp_Counter
 
 Clock sources
 i) CPU clock
 ii) Programmable interrupt timer
 iii) Real time clock
-iv) High resolution event timer 
+iv) High resolution event timer
+
+Notes
+-----
+i) Set the CPU affinity of the process using taskset to make the process have affinity towards a particular core
+ii) Newer CPUs have a constant tick rate for the TSC - "constant_tsc" in /proc/cpuinfo, also the ones in the royal lab
+
