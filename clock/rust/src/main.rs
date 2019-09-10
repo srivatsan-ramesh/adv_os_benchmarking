@@ -11,23 +11,23 @@ fn main() {
         for j in 0..diffs.len() {
                 asm!("
                 cpuid\n
-                rdtsc\n
-                shl rdx, 32\n
-                add rdx, rax\n": "={rdx}"(diff_early)::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
+                rdtscp\n
+                #shl rdx, 32\n
+                #add rdx, rax\n": "={rax}"(diff_early)::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
 
                 /*asm!("
                 xor rax, rax\n
                 xor rbx, rbx":::"rax", "rbx":"intel");*/
-                for k1 in 0..1000 {
-                    asm!("mov rax, $0\n",
-                         "add rax, 1\n": "={rax}"(count) : "$0"(count): "rax", "memory" : "volatile", "intel");
+                for k1 in 0..10000 {
+                    asm!("mov rax, $1\n
+                          add rax, 1\n": "={rax}"(count) : "r"(count): "rax", "memory" : "volatile", "intel");
                 }
 
                 asm!("
                 rdtscp\n
-                shl rdx, 32\n
-                add rdx, rax\n
-                ": "={rdx}"(diff_late)::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
+                #shl rdx, 32\n
+                #add rdx, rax\n
+                ": "={rax}"(diff_late)::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
 
                 diffs[j] =  diff_late - diff_early;
                 asm!("cpuid":::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
@@ -36,9 +36,14 @@ fn main() {
 
     }
 
+    let mut min = 1000000000;
     for i in 0..diffs.len() {
         print!("{:?}, ", diffs[i]);
+        if diffs[i] < min {
+            min = diffs[i];
+        }
+
     }
 
-    print!("count = {}", count);
+    println!("count = {}, min = {}", count, min);
 }
