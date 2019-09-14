@@ -18,7 +18,7 @@ fn main() {
                 
             let start = clock_gettime(CLOCK_REALTIME, &mut tspec1 as *mut timespec);
        
-            for k1 in 0..1000 {
+            for k1 in 0..0 {
                     asm!("mov rax, $1\n
                           add rax, 1\n": "={rax}"(count) : "r"(count): "rax", "memory" : "volatile", "intel");
             }

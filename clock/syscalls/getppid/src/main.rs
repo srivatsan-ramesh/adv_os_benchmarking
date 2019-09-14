@@ -1,10 +1,8 @@
 #![feature(asm)]
 
-pub mod macro;
-
 fn main() {
     let mut diffs: [u64; 1000000] = [0; 1000000];
-    let mut count: u64 = 10;
+    let mut ppid: u64 = 0;
     let mut diff_early: u64 = 0;
     let mut diff_late: u64 = 0;
 
@@ -19,8 +17,8 @@ fn main() {
                 xor rax, rax\n
                 xor rbx, rbx":::"rax", "rbx":"intel");*/
                 for _k1 in 0..1 {
-                    asm!("mov rax, $1\n
-                          add rax, 1\n": "={rax}"(count) : "r"(count): "rax", "memory" : "volatile", "intel");
+                    asm!("mov rax, 110\n
+                          syscall\n": "={rax}"(ppid) :: "rax", "memory" : "volatile", "intel");
                 }
 
                 asm!("
@@ -45,5 +43,5 @@ fn main() {
 
     }
 
-    println!("count = {}, min = {}", count, min);
+    println!("ppid = {}, min = {}", ppid, min);
 }
