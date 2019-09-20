@@ -1,1 +1,0 @@
-/afs/cs.wisc.edu/u/d/s/dsirone/projects/adv_os_benchmarking/clock/syscalls/getppid/target/release/getppid: /afs/cs.wisc.edu/u/d/s/dsirone/projects/adv_os_benchmarking/clock/syscalls/getppid/src/main.rs

@@ -1,7 +1,8 @@
+#!/bin/bash
 cargo build --release
-i="0"
-while [ $i -lt $1 ]; 
-do
-	taskset -c 1 ./target/release/pipe_fork
-	i=$(($i + 1))
+sizes=(4 16 64 256 1024 4096 16384 65536 262144 524288)
+for size in ${sizes[@]}; do
+	echo "Running for size: "$size
+	./target/release/pipe_fork $size >> output_$size
+	echo "Min Value = "$(cat output_$size | sort -nr | tail -n 1)
 done
