@@ -3,26 +3,41 @@ use std::io::prelude::*;
 use std::io::{Read};
 use std::net::TcpStream;
 
-const SIZE : usize = 256*1024;
-const ITERATIONS : usize = 1000;
+use std::env;
+use std::process;
+
+const ITERATIONS : usize = 100000;
 
 fn main() -> std::io::Result<()> {
 
-    let data = &[1u8; SIZE];
-    let buf = & mut [0u8; SIZE];
+    let sizes = vec![4, 16, 64, 256, 1024, 4096, 16*1024];
 
-    let mut diffs: [u64; ITERATIONS] = [0; ITERATIONS];
-    let mut diff_early: u64 = 0;
-    let mut diff_late: u64 = 0;
+    let address = match env::args().skip(1).next() {
+        Some(num) => {
+            num.to_string()
+        },
+        None => {
+            println!("Invalid args");
+            process::exit(1);
+        }
+    };
 
+    let mut diffs = vec![0; sizes.len()];
+    let mut diff_early: u64;
+    let mut diff_late: u64;
+
+    let mut stream = TcpStream::connect(address)?;
+    stream.set_nodelay(true).expect("set_nodelay call failed");
+    stream.set_nonblocking(false)?;
 
     unsafe {
-        for j in 0..diffs.len() {
-                let mut stream = TcpStream::connect("127.0.0.1:8080")?;
-                stream.set_nodelay(true).expect("set_nodelay call failed");
-                stream.set_nonblocking(false)?;
-                let mut bytes_written : usize = 0;
-                let mut bytes_read : usize = 0;
+        for i in 0..sizes.len() {
+            let data = & vec![1u8; sizes[i]];
+            let buf = & mut vec![0u8; sizes[i]];
+            for _j in 0..ITERATIONS {
+
+                let mut bytes_written : usize;
+                let mut bytes_read : usize;
                 asm!("
                 rdtscp\n
                 shl rdx, 32\n
@@ -33,7 +48,7 @@ fn main() -> std::io::Result<()> {
 
                 while c > 0 {
                     bytes_written += c;
-                    if bytes_written >= SIZE {
+                    if bytes_written >= sizes[i] {
                         break;
                     }
                     c = stream.write(&data[bytes_written..])?;
@@ -44,7 +59,7 @@ fn main() -> std::io::Result<()> {
                 while c1 > 0 {
                    
                     bytes_read += c1;
-                    if bytes_read >= SIZE {
+                    if bytes_read >= sizes[i] {
                         break;
                     }
                     c1 = stream.read(&mut buf[bytes_read..])?;
@@ -56,22 +71,15 @@ fn main() -> std::io::Result<()> {
                 or rax, rdx\n
                 ": "={rax}"(diff_late)::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
 
-                diffs[j] =  diff_late - diff_early;
+                let diff =  diff_late - diff_early;
+                if diffs[i] == 0 || diff < diffs[i] {
+                    diffs[i] = diff;
+                }
+            }
+
+            println!("{} bytes, min_time={}", sizes[i], diffs[i] as f64/6.4);
         }
-
-
     }
-
-    let mut min = 0;
-    for i in 0..diffs.len() {
-        print!("{:?}, ", diffs[i]);
-        if min == 0 || diffs[i] < min {
-            min = diffs[i];
-        }
-
-    }    
-
-    println!("min = {}", min);
 
     Ok(())
 } // the stream is closed here

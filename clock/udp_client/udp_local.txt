@@ -1,0 +1,7 @@
+4 bytes, min_time 3847.5
+16 bytes, min_time 3745.78125
+64 bytes, min_time 3519.53125
+256 bytes, min_time 3520.46875
+1024 bytes, min_time 3650.46875
+4096 bytes, min_time 4391.25
+16384 bytes, min_time 6219.375

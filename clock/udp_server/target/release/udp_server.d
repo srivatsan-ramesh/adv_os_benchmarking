@@ -1,1 +1,1 @@
-/Users/srivatsan/Documents/courses/Advanced\ OS/assignments/adv_os_benchmarking/clock/udp_server/target/release/udp_server: /Users/srivatsan/Documents/courses/Advanced\ OS/assignments/adv_os_benchmarking/clock/udp_server/src/main.rs
+/afs/cs.wisc.edu/u/s/r/sri/courses/advance_os/adv_os_benchmarking/clock/udp_server/target/release/udp_server: /afs/cs.wisc.edu/u/s/r/sri/courses/advance_os/adv_os_benchmarking/clock/udp_server/src/main.rs
