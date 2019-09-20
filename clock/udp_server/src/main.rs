@@ -1,48 +1,69 @@
-#![feature(asm)]
 use std::net::UdpSocket;
 
+use std::env;
+use std::process;
+
+const ITERATIONS : usize = 100000;
+
 fn main() -> std::io::Result<()> {
-    let mut diffs: [u64; 1000] = [0; 1000];
-    let mut count: u64 = 10;
-    let mut diff_early: u64 = 0;
-    let mut diff_late: u64 = 0;
+    {
+        let sizes = vec![16*1024];
 
-    let mut buf = [21u8; 4];
+        let from = match env::args().skip(1).next() {
+            Some(num) => {
+                num.to_string()
+            },
+            None => {
+                println!("Invalid args");
+                process::exit(1);
+            }
+        };
 
-    unsafe {
-        for j in 0..diffs.len() {
-                let mut socket = UdpSocket::bind("127.0.0.1:8082")?;
+        let to = match env::args().skip(2).next() {
+            Some(num) => {
+                num.to_string()
+            },
+            None => {
+                println!("Invalid args");
+                process::exit(1);
+            }
+        };
 
-                asm!("
-                rdtscp\n
-                shl rdx, 32\n
-                or rax, rdx\n": "={rax}"(diff_early)::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
+        let socket = UdpSocket::bind(from)?;
 
-                socket.send_to(&mut buf, "127.0.0.1:8081")?;
-                socket.recv_from(&mut buf)?;
+        let mut bytes_written : usize;
+        let mut bytes_read : usize;
 
-                asm!("
-                rdtscp\n
-                shl rdx, 32\n
-                or rax, rdx\n
-                ": "={rax}"(diff_late)::"rax", "rdx", "rcx", "rbx", "memory": "volatile", "intel");
+        for i in 0..sizes.len() {
+            let mut buf = vec![0; sizes[i]];
+            for _j in 0..ITERATIONS {
 
-                diffs[j] =  diff_late - diff_early;
-                println!("{}", buf[0]);
+                bytes_written = 0;
+                bytes_read = 0;
+
+                let (mut c, _src) = socket.recv_from(&mut buf[bytes_read..])?;
+
+                while c > 0 {
+                    bytes_read += c;
+                    if bytes_read >= sizes[i] {
+                        break;
+                    }
+                    let (p, _s) = socket.recv_from(&mut buf[bytes_read..])?;
+                    c = p;
+                }
+
+                c = socket.send_to(&mut buf[bytes_written..], &to)?;
+
+                while c > 0 {
+                    bytes_written += c;
+                    if bytes_written >= sizes[i] {
+                        break;
+                    }
+                    c = socket.send_to(&mut buf[bytes_written..], &to)?;
+                }
+            }
         }
-
-
-    }
-
-    let mut min = 0;
-    for i in 0..diffs.len() {
-        print!("{:?}, ", diffs[i]);
-        if min == 0 || diffs[i] < min {
-            min = diffs[i];
-        }
-
-    }    
-
-    println!("min = {}", min);
+        
+    } // the socket is closed here
     Ok(())
 }
