@@ -2,21 +2,26 @@
 
 ## Steps to Execute
 
-## Clock - Timestamp Counter
+### Clock - Timestamp Counter
 ```cd clock_tsc
-```cargo run --release
+cargo run --release
+```
+### Clock - Realtime Clock
+```
+cd clock_realtime
+cargo run --release
+```
+### Pipe - Latency
+```
+cd pipe_fork
+./run_test.sh
+```
 
-## Clock - Realtime Clock
-``` cd clock_realtime
-``` cargo run --release
-
-## Pipe - Latency
-``` cd pipe_fork
-``` ./run_test.sh
-
-## Pipe - Throughput
-``` cd pipe_fork_throughput
-``` ./run_test.sh
+### Pipe - Throughput
+```		
+cd pipe_fork_throughput
+./run_test.sh
+```
 
 ### TCP
 1. Start the server
